@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>500</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" th:href="${#httpServletRequest.getContextPath()}+'/images/favicon.ico'"/>
+    <link rel="stylesheet" type="text/css"
+          th:href="${#httpServletRequest.getContextPath()}+'/js/bootstrap-4.3.1/css/bootstrap.min.css'"/>
+    <link rel="stylesheet" type="text/css" th:href="${#httpServletRequest.getContextPath()}+'/css/error.css'"/>
+</head>
+<body>
+<div class="error-container">
+    <div class="error-code">500</div>
+    <div class="error-text">内部错误</div>
+    <div class="error-subtext">
+        <div th:text="'result:'+${result}"></div>
+        <div th:text="'code:'+${code}"></div>
+        <div th:text="'message:'+${message}"></div>
+        <div th:text="'exception:'+${exception}"></div>
+        <div th:text="'path:'+${path}"></div>
+        <div th:text="'status:'+${status}"></div>
+        <div th:text="'error:'+${error}"></div>
+        <div th:text="'timestamp:'+${timestamp}"></div>
+    </div>
+</div>
+</body>
+</html>

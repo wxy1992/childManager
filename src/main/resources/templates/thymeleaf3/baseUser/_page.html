@@ -1,0 +1,89 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="form">
+    <input type="hidden" name="id" id="id" th:value="${baseUserInstance.id}"/>
+    <input type="hidden" name="version" id="version" th:value="${baseUserInstance.version}"/>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="realname" required id="inputBaseUser-realname"
+                       th:value="${baseUserInstance.realname}">
+                <span class="form-bar"></span>
+                <label for="inputBaseUser-realname" th:text="#{baseUser.realname.label}">realname</label>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="username" required id="inputBaseUser-username"
+                       th:value="${baseUserInstance.username}">
+                <span class="form-bar"></span>
+                <label for="inputBaseUser-username" th:text="#{baseUser.username.label}">username</label>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="password" required id="inputBaseUser-password"
+                       th:value="${baseUserInstance.password}">
+                <span class="form-bar"></span>
+                <label for="inputBaseUser-password" th:text="#{baseUser.password.label}">password</label>
+            </div>
+
+            <div class="form-group">
+                <select class="form-control selectpicker" name="enabled" title="--" id="inputBaseUser-enabled"
+                        data-placeholder="select：">
+                    <option value=""></option>
+                    <option th:each="booleanVal:${booleanVals}" th:value="${booleanVal}"
+                            th:selected="${#strings.equals(baseUserInstance.enabled,booleanVal)}"
+                            th:text="${booleanVal}">booleanVal
+                    </option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="inputBaseUser-enabled" th:text="#{baseUser.enabled.label}">enabled</label>
+            </div>
+
+            <div class="form-group">
+                <select class="form-control selectpicker" name="authorities" multiple title="--"
+                        id="inputBaseUser-authorities"
+                        data-live-search="true" data-placeholder="select：">
+                    <option value=""></option>
+                    <option th:each="role:${roles}" th:value="${role.id}"
+                            th:selected="${#lists.contains(baseUserRoles,role.id)}"
+                            th:text="${role.description}">角色描述
+                    </option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="inputBaseUser-authorities" text="角色">角色</label>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:fragment="show">
+
+    <div class="form-group-separated">
+        <div class="form-group">
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{baseUser.realname.label}">realname</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${baseUserInstance.realname}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{baseUser.username.label}">username</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${baseUserInstance.username}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{baseUser.enabled.label}">enabled</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${baseUserInstance.enabled}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="角色"></label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${baseUserInstance.authorities}"/></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

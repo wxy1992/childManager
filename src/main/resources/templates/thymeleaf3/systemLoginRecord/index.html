@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/main">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <section layout:fragment="head">
+        <script th:inline="javascript">
+            $(function () {
+                $("#systemLoginRecordTable").bootstrapTable({});
+            });
+
+            function queryParams(params) {
+                params.max = params.limit;
+                return params;
+            }
+
+            function responseHandler(res) {
+                var flatArray = {};
+                flatArray.total = res.total;
+                var rowsArray = [];
+                $.each(res.rows, function (i, element) {
+                    rowsArray.push(JSON.flatten(element));
+                });
+                flatArray.rows = rowsArray;
+                return flatArray;
+            }
+
+            function showFormatter(value, row, index) {
+                var str = '<a class="margin" href="javascript:void(0);" onclick="showOne(' + index + ',' + row.id + ')" >' + value + '</a>';
+                return str;
+            }
+
+
+            function showOne(index, id) {
+                $.post(contextPath + "/systemLoginRecord/show", {"id": id}, function (data, textStatus) {
+                    $('#showFormDiv').html(data);
+                    $('#showModal').modal('show');
+                    $('#editButtonInShowModal').removeAttr('onclick');
+                    $('#editButtonInShowModal').unbind('click');
+                    $('#editButtonInShowModal').click(function () {
+                        editOne(index, id);
+                    });
+                }, "html");
+            }
+
+
+        </script>
+    </section>
+</head>
+<body layout:fragment="body">
+
+<div class="modal" id="showModal" tabindex="-1" role="dialog" aria-labelledby="showModalHead" aria-hidden="true">
+    <div class="modal-dialog" style="width: 1000px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="showModalHead">
+                    显示
+                </h4>
+            </div>
+            <div class="modal-body" id="showFormDiv" style="padding: 0 100px 30px 100px">
+
+            </div>
+            <div class="modal-footer">
+
+
+                <button class="btn btn-default margin" data-dismiss="modal" type="button">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="operateModal" tabindex="-1" role="dialog" aria-labelledby="showModalHead"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title">操作提示</h4>
+            </div>
+            <div class="modal-body" id="operateModalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default margin" data-dismiss="modal" type="button">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <div class="page-title">
+                <h2><span class="fa fa-arrow-circle-o-left"></span><label th:text="#{systemLoginRecord.label}"/></h2>
+            </div>
+        </h3>
+    </div>
+    <div class="panel-body">
+        <!-- START FLOATED TITLES -->
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row box animated active table-responsive">
+                    <div id="toolbar">
+
+                    </div>
+                    <table id="systemLoginRecordTable" data-toolbar="#toolbar" data-cache="false" data-toggle="table"
+                           data-url="/systemLoginRecord/json"
+                           th:data-url="${#httpServletRequest.getContextPath()}+'/systemLoginRecord/json'"
+                           data-show-refresh="true" data-show-toggle="true" data-show-columns="true"
+                           data-query-params="queryParams" data-response-handler="responseHandler"
+                           data-side-pagination="server" data-checkbox="true" data-pagination="true"
+                           data-select-item-name="checkIds" data-sort-name="id" data-sort-order="desc">
+                        <thead>
+                        <th data-field="nofield" data-checkbox="true"></th>
+                        <th data-field="sessionId" data-formatter="showFormatter" data-align="center"
+                            th:text="#{systemLoginRecord.sessionId.label}"></th>
+                        <th data-field="baseUser.label" data-align="center"
+                            th:text="#{systemLoginRecord.baseUser.label}"></th>
+                        <th data-field="remoteaddr" data-align="center"
+                            th:text="#{systemLoginRecord.remoteaddr.label}"></th>
+
+                        <th data-field="logoutTime" data-align="center"
+                            th:text="#{systemLoginRecord.logoutTime.label}"></th>
+
+                        <th data-field="loginTime" data-align="center"
+                            th:text="#{systemLoginRecord.loginTime.label}"></th>
+
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END FLOATED TITLES -->
+    </div>
+
+</div>
+</body>
+</html>

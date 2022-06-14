@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/main">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <section layout:fragment="head">
+        <script th:inline="javascript">
+            \$(function () {
+            \$("#${propertyName}Table").bootstrapTable({});
+            });
+
+            function queryParams(params) {
+                params.max = params.limit;
+                return params;
+            }
+
+            function responseHandler(res) {
+                var flatArray = {};
+                flatArray.total = res.total;
+                var rowsArray = [];
+                \$.each(res.rows, function (i, element) {
+                    rowsArray.push(JSON.flatten(element));
+                });
+                flatArray.rows = rowsArray;
+                return flatArray;
+            }
+
+            function showFormatter(value, row, index) {
+                var str = '<a class="margin" href="javascript:void(0);" onclick="showOne(' + index + ',' + row.id + ')" >' + value + '</a>';
+                return str;
+            }
+
+            function operationFormatter(value, row, index) {
+                var str = '<button class="btn btn-default margin" data-switch="box-edit" onclick="editOne(' + index + ',' + row.id + ')"  type="button"><span class="glyphicon glyphicon-edit"></span> &nbsp;Edit</button></a>';
+                str += '<button class="btn btn-default margin" data-switch="box-trash" onclick="deleteOne(' + index + ',' + row.id + ')"  type="button"><span class="glyphicon glyphicon-trash"></span> &nbsp;Delete</button></a>';
+                return str;
+            }
+
+            function newOne() {
+            \$.post(contextPath + "/${propertyName}/create", function (data, textStatus) {
+                \$('#editFormDiv').html(data);
+                    \$('#editModal').modal('show');
+                    initBootstrapPlugin();
+                }, "html");
+            }
+
+            function showOne(index, id) {
+            \$.post(contextPath + "/${propertyName}/show", {"id": id}, function (data, textStatus) {
+                \$('#showFormDiv').html(data);
+                    \$('#showModal').modal('show');
+                    \$('#editButtonInShowModal').removeAttr('onclick');
+                    \$('#editButtonInShowModal').unbind('click');
+                    \$('#editButtonInShowModal').click(function () {
+                        editOne(index, id);
+                    });
+                }, "html");
+            }
+
+            function editOne(index, id) {
+            \$.post(contextPath + "/${propertyName}/edit", {"id": id}, function (data, textStatus) {
+                \$('#editFormDiv').html(data);
+                    \$('#editModal').modal('show');
+                    initBootstrapPlugin();
+                }, "html");
+            }
+
+            function deleteOne(index, id) {
+                if (confirm('确认删除?')) {
+                \$.post(contextPath + "/${propertyName}/delete", {"id": id},
+                        function (data, textStatus) {
+                            if (data.result) {
+                            \$("#operateModalBody").html(data.message);
+                                    \$("#operateModal").modal("show");
+                                    \$('#${propertyName}Table').bootstrapTable('refresh', []);
+                            } else {
+                            \$("#operateModalBody").html(data.message);
+                                    \$("#operateModal").modal("show");
+                            }
+                        }, "json");
+                }
+            }
+
+            function deleteAll() {
+                var selects =\$('#${propertyName}Table').bootstrapTable('getSelections');
+                if (selects.length > 0) {
+                    var ids = new Array();
+                    for (var i = 0; i < selects.length; i++) {
+                        ids.push(selects[i].id);
+                    }
+                    if (confirm('确认删除?')) {
+                    \$.post(contextPath + "/${propertyName}/deletes", {"ids": ids.join(",")},
+                            function (data, textStatus) {
+                                if (data.result) {
+                                \$("#operateModalBody").html(data.message);
+                                        \$("#operateModal").modal("show");
+                                        \$('#${propertyName}Table').bootstrapTable('refresh', []);
+                                } else {
+                                \$("#operateModalBody").html(data.message);
+                                        \$("#operateModal").modal("show");
+                                }
+                            }, "json");
+                    }
+                } else {
+                \$("#operateModalBody").html("请选择要删除的数据");
+                    \$("#operateModal").modal("show");
+                }
+            }
+
+            function saveInstance() {
+                var action = "/${propertyName}/save";
+                var idObj =\$("#${propertyName}Form input[name='id']");
+                if (idObj.val()) {
+                    action = "/${propertyName}/update";
+                }
+                \$.post(contextPath + action, \$("#${propertyName}Form").serialize(),
+                    function (data, textStatus) {
+                        if (data.result) {
+                        \$("#operateModalBody").html(data.message);
+                            \$("#editModal").modal("hide");
+                            \$("#operateModal").modal("show");
+                            \$('#${propertyName}Table').bootstrapTable('refresh', []);
+                        } else {
+                            var validator = \$("#${propertyName}Form").validate();
+                            validator.showErrors(data.errors);
+                        }
+                    }, "json"
+            )
+                ;
+            }
+
+            function download() {
+                window.location.href = contextPath + "/${propertyName}/download";
+            }
+        </script>
+    </section>
+</head>
+<body layout:fragment="body">
+<div class="modal" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalHead" aria-hidden="true">
+    <div class="modal-dialog" style="width: 1000px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="editModalHead">
+                    管理
+                </h4>
+            </div>
+            <div class="modal-body" id="editFormDiv" style="padding: 0 100px 30px 100px">
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default margin" onclick="saveInstance();" type="button">
+                    <span class="glyphicon glyphicon-check"></span>
+                    保存
+                </button>
+
+                <button class="btn btn-default margin" data-dismiss="modal" type="button">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal" id="showModal" tabindex="-1" role="dialog" aria-labelledby="showModalHead" aria-hidden="true">
+    <div class="modal-dialog" style="width: 1000px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="showModalHead">
+                    显示
+                </h4>
+            </div>
+            <div class="modal-body" id="showFormDiv" style="padding: 0 100px 30px 100px">
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default margin" data-dismiss="modal" id="editButtonInShowModal" type="button">
+                    <span class="glyphicon glyphicon-check"></span>
+                    编辑
+                </button>
+
+                <button class="btn btn-default margin" data-dismiss="modal" type="button">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="operateModal" tabindex="-1" role="dialog" aria-labelledby="showModalHead"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title">操作提示</h4>
+            </div>
+            <div class="modal-body" id="operateModalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default margin" data-dismiss="modal" type="button">
+                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <div class="page-title">
+                <h2><span class="fa fa-arrow-circle-o-left"></span><label th:text="#{${propertyName}.label}"/></h2>
+            </div>
+        </h3>
+    </div>
+    <div class="panel-body">
+        <!-- START FLOATED TITLES -->
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row box animated active table-responsive">
+                    <div id="toolbar">
+                        <button class="btn btn-default margin box-switcher" onclick="newOne()" type="button"
+                                data-switch="box-edit">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            创建
+                        </button>
+                        <button class="btn btn-default" type="button" onclick="deleteAll()">
+                            <span class="glyphicon glyphicon-trash"></span>
+                            删除
+                        </button>
+                        <button class="btn btn-default" type="button" onclick="download()">
+                            <span class="glyphicon glyphicon-folder-open"></span>
+                            导出Excel
+                        </button>
+                    </div>
+                    <table id="${propertyName}Table" data-toolbar="#toolbar" data-cache="false" data-toggle="table"
+                           data-url="/${propertyName}/json"
+                           th:data-url="\${#httpServletRequest.getContextPath()}+'/${propertyName}/json'"
+                           data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true"
+                           data-query-params="queryParams" data-response-handler="responseHandler"
+                           data-side-pagination="server" data-checkbox="true" data-pagination="true"
+                           data-select-item-name="checkIds" data-sort-name="id" data-sort-order="desc">
+                        <thead>
+                        <th data-field="nofield" data-checkbox="true"></th>
+                        <%
+                        List excludedProps = ['id','version','dateCreated','lastUpdated'];
+                        boolean hasShow=false;
+                        domainClass.gormPersistentEntity.persistentProperties.eachWithIndex{property,index->
+                        if(excludedProps.contains(property.name)){return}
+                        if(index>7){return}
+                        if(!hasShow && property.type!=java.util.SortedSet && property.type!=java.util.Set &&
+                        property.type!=([] as Byte[]).class && property.type!=([] as byte[]).class &&
+                        property.type!=java.sql.Blob){
+                        hasShow=true;
+                        %>
+                        <th data-field="${property.name}" data-formatter="showFormatter" data-align="center"
+                            th:text="#{${propertyName}.${property.name}.label}"></th>
+                        <%
+                        }else{
+                        %>
+                        <th data-field="${property.name}" data-align="center"
+                            th:text="#{${propertyName}.${property.name}.label}"></th>
+                        <%
+                        }
+
+                        }%>
+                        <th data-field="id" data-formatter="operationFormatter">Operation</th>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END FLOATED TITLES -->
+    </div>
+
+</div>
+</body>
+</html>

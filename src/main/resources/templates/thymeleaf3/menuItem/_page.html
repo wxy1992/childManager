@@ -1,0 +1,85 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="form">
+    <input type="hidden" name="id" id="id" th:value="${menuItemInstance.id}"/>
+    <input type="hidden" name="version" id="version" th:value="${menuItemInstance.version}"/>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="form-group">
+                <input type="number" class="form-control" name="sequenceNum" required id="inputMenuItem-sequenceNum"
+                       th:value="${menuItemInstance.sequenceNum}">
+                <span class="form-bar"></span>
+                <label for="inputMenuItem-sequenceNum" th:text="#{menuItem.sequenceNum.label}">sequenceNum</label>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="url" id="inputMenuItem-url"
+                       th:value="${menuItemInstance.url}">
+                <span class="form-bar"></span>
+                <label for="inputMenuItem-url" th:text="#{menuItem.url.label}">url</label>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="name" required id="inputMenuItem-name"
+                       th:value="${menuItemInstance.name}">
+                <span class="form-bar"></span>
+                <label for="inputMenuItem-name" th:text="#{menuItem.name.label}">name</label>
+            </div>
+
+            <div class="form-group">
+                <select class="form-control selectpicker" name="requestmap.id" title="--" id="inputMenuItem-requestmap"
+                        data-placeholder="select：">
+                    <option value=""></option>
+                    <option th:each="requestmap:${requestmaps}" th:value="${requestmap.id}"
+                            th:selected="${#strings.equals(menuItemInstance.requestmapId,requestmap.id)}"
+                            th:text="${requestmap.toString()}">name：
+                    </option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="inputMenuItem-requestmap" th:text="#{menuItem.requestmap.label}">requestmap</label>
+            </div>
+
+            <div class="form-group">
+                <select class="form-control selectpicker" name="parent.id" title="--" id="inputMenuItem-parent"
+                        data-placeholder="select：">
+                    <option value=""></option>
+                    <option th:each="parent:${parents}" th:value="${parent.id}"
+                            th:selected="${#strings.equals(menuItemInstance.parentId,parent.id)}"
+                            th:text="${parent.toString()}">name：
+                    </option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="inputMenuItem-parent" th:text="#{menuItem.parent.label}">parent</label>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:fragment="show">
+
+    <div class="form-group-separated">
+        <div class="form-group">
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label"
+                       th:text="#{menuItem.sequenceNum.label}">sequenceNum</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${menuItemInstance.sequenceNum}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{menuItem.url.label}">url</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${menuItemInstance.url}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{menuItem.name.label}">name</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${menuItemInstance.name}"/></div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

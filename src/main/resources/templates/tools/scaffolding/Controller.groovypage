@@ -1,0 +1,201 @@
+<%=packageName ? "package ${packageName}\n\n" : ''%>
+
+import ${domainClass.name}
+import ${servicePackageName}.${className}Service
+import ${rootPackageName}.service.core.UtilService
+import org.yunchen.gb.core.GbSpringUtils
+import org.yunchen.gb.core.PageParams
+import org.yunchen.gb.plugin.poi.ExcelWriteBuilder
+import org.yunchen.gb.core.annotation.GbController
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.ResponseBody
+import groovy.util.logging.Slf4j
+import org.springframework.transaction.annotation.Transactional
+/**
+ * Generate by GbTools ${toolVersion} on ${new Date().format('yyyy-MM-dd')}.
+ */
+@Slf4j
+@Transactional
+@GbController
+class ${className}Controller {
+    @Autowired private ${className}Service ${propertyName}Service
+    @Autowired private UtilService utilService
+    public void index(){
+
+    }
+
+    @ResponseBody
+    public Map json(PageParams pageParams,String search){
+        return ${propertyName}Service.search(pageParams,search);
+    }
+
+    public void show(${idType} id,Model model){
+        ${className} ${propertyName}Instance = ${propertyName}Service.read(id)
+        model.addAttribute("${propertyName}Instance",${propertyName}Instance);
+    }
+
+    public void create(Model model){
+        ${className} ${propertyName}Instance =${propertyName}Service.create()
+        model.addAttribute("${propertyName}Instance",${propertyName}Instance);
+        <%
+        domainClass.gormPersistentEntity.persistentProperties.each{property->
+            if(org.yunchen.gb.core.GbSpringUtils.isDomain(property.type)){
+         %>
+         model.addAttribute("${property.name}s",${property.type.name}.list());
+         <%
+            }
+        }
+        %>
+    }
+
+    @ResponseBody
+    public Map save(${className} ${propertyName}Instance){
+        Map map=new HashMap();
+        if (${propertyName}Instance == null) {
+            notFound(map,"");
+            return map;
+        }
+
+        if (${propertyName}Instance.hasErrors()) {
+            foundErrors(${propertyName}Instance,map);
+            return map;
+        }
+
+        if (!${propertyName}Service.save(${propertyName}Instance)) {
+            foundErrors(${propertyName}Instance,map);
+        }else{
+            map.result = true;
+            map.id=${propertyName}Instance.id;
+            String domainName=GbSpringUtils.getI18nMessage("${propertyName}.label");
+            map.message = GbSpringUtils.getI18nMessage("default.created.message",[domainName,${propertyName}Instance.id]);
+        }
+        return map;
+    }
+
+    public void edit(${idType} id,Model model){
+        ${className} ${propertyName}Instance = ${propertyName}Service.read(id)
+        model.addAttribute("${propertyName}Instance",${propertyName}Instance);
+        <%
+        domainClass.gormPersistentEntity.persistentProperties.each{property->
+            if(org.yunchen.gb.core.GbSpringUtils.isDomain(property.type)){
+         %>
+         model.addAttribute("${property.name}s",${property.type.name}.list());
+         <%
+            }
+        }
+        %>
+    }
+
+    @ResponseBody
+    public Map update(${className} ${propertyName}Instance,Long version){
+        Map map=new HashMap();
+        if (${propertyName}Instance== null) {
+            notFound(map,"\${${propertyName}Instance.id}")
+            return map
+        }
+        if (version != null) {
+            if (${propertyName}Instance.version>version) {
+                map.result=false
+                map.message = GbSpringUtils.getI18nMessage("default.optimistic.locking.failure",[${propertyName}Instance.id]);
+                return map;
+            }
+        }
+        if (${propertyName}Instance.hasErrors()) {
+            foundErrors(${propertyName}Instance,map);
+            return map
+        }
+        boolean result=${propertyName}Service.save(${propertyName}Instance)
+        if (!result) {
+            foundErrors(${propertyName}Instance,map);
+        }else{
+            map.result = true;
+            String domainName=GbSpringUtils.getI18nMessage("${propertyName}.label");
+            map.message = GbSpringUtils.getI18nMessage("default.updated.message",[domainName,${propertyName}Instance.id]);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    public Map delete(${idType} id){
+        Map map=new HashMap();
+        ${className} ${propertyName}Instance=${className}.get(id);
+        if (${propertyName}Instance == null) {
+            notFound(map,"\${id}");
+            return map;
+        }
+        String domainId = ${propertyName}Instance.id.toString()
+        boolean result=${propertyName}Service.delete(${propertyName}Instance)
+        map.result = result
+        String domainName = GbSpringUtils.getI18nMessage("${propertyName}.label");
+        if(result){
+            map.message = GbSpringUtils.getI18nMessage("default.deleted.message", [domainName, domainId]);
+        }else{
+            map.message = GbSpringUtils.getI18nMessage("default.not.deleted.message", [domainName, domainId]);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    public Map deletes(String ids,Model model){
+        Map map=new HashMap();
+        String domainName = GbSpringUtils.getI18nMessage("${propertyName}.label");
+        boolean result=${propertyName}Service.deletes(ids)
+        map.result = result;
+        if(result){
+            map.message = GbSpringUtils.getI18nMessage("default.deleted.message", [domainName, ids]);
+        }else{
+            map.message = GbSpringUtils.getI18nMessage("default.not.deleted.message", [domainName, ids]);
+        }
+        return map;
+    }
+
+
+    public void download(javax.servlet.http.HttpServletResponse response){
+        File tempFile=File.createTempFile("_tmp",".xls")
+        //开发模式获取模板文件
+        URL templateFileResource=ClassLoader.getResource("/templates/tools/empty.xls")
+        if(templateFileResource){
+            tempFile.bytes=new File(templateFileResource.toURI()).bytes
+        }else{
+            //jar包模式下获取模板文件
+            tempFile.bytes=this.class.classLoader.getResourceAsStream("/templates/tools/empty.xls")?.bytes
+        }
+        ExcelWriteBuilder excelWriteBuilder = new ExcelWriteBuilder(tempFile);
+        excelWriteBuilder.workbook {
+            sheet("sheet1") {
+                row(["id","version", "info"]);
+                ${propertyName}Service.list(new PageParams(max:100),{}).each{${className} ${propertyName}Instance->
+                    row([${propertyName}Instance.id,${propertyName}Instance.version,${propertyName}Instance.toString()])
+                }
+            }
+        }
+        byte[] excelBytes=excelWriteBuilder.download();
+        try{
+            response.setContentType("application/octet-stream;charset=GBK")
+            response.addHeader("Content-Disposition", 'attachment; filename="' + new String("文件导出Excel.xls".getBytes("GBK"),"ISO8859-1")+'"');
+            OutputStream out = response.outputStream;
+            out.write(excelBytes);
+            out.close();
+        }catch(e){
+            log.error(e.message);
+            response.writer.print(e.message);
+        }
+    }
+
+
+
+
+    protected Map notFound(Map map,String id) {
+        String domainName=GbSpringUtils.getI18nMessage("${propertyName}.label");
+        map.result=false;
+        map.message = GbSpringUtils.getI18nMessage("default.not.found.message",[domainName,id]);
+        return map;
+    }
+    protected Map foundErrors(${className} ${propertyName}Instance,Map map){
+        map.result = false;
+        map.errors = utilService.collectionErrorMap(${className},${propertyName}Instance);
+        return map;
+    }
+}
+

@@ -1,0 +1,247 @@
+server.servlet.contextPath: /
+server.port: 8989
+server.package: org.yunchen.gb.example.childmanager
+server.error.whitelabel.enabled: false
+server.error.include-stacktrace: NEVER # NEVER , ALWAYS,ON_TRACE_PARAM
+server.error.pageforstatus: false
+spring.main.allow-circular-references: true
+spring.profiles.active: development  #current active profile
+spring.application.name: ChildManagerApplication
+server.servlet.encoding.charset: UTF-8
+server.servlet.encoding.enabled: true
+server.servlet.encoding.force: true
+server.servlet.encoding.force-request: true
+server.servlet.encoding.force-response: true
+logging.level.org.hibernate.orm.deprecation: error
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    #最小线程数
+    min-spare-threads: 500
+    #最大线程数
+    max-threads: 4000
+    #最大链接数
+    max-connections: 20000
+    #最大等待队列长度   建议与max-threads一样
+    accept-count: 10000
+#文件上传大小限制
+spring.servlet.multipart.maxFileSize: 100MB  #单文件大小
+spring.servlet.multipart.maxRequestSize: 200MB #单次请求的总文件大小
+spring.messages.basename: i18n/messages
+spring.h2.console.enabled: true
+spring.h2.console.path: /dbconsole
+#gorm
+grails.gorm.failOnError: false
+grails.gorm.autoFlus: false
+
+#GB spring security
+gb:
+  rest:
+    prefix:
+    unifiedJsonResult: false
+    microservice: false
+  mvc:
+    translateStringArgument: false
+    translateDomainArgument: false
+  springsecurity:
+    active: true
+    frameOptions: sameOrigin   #disabled,deny,sameOrigin
+    csrf: disable
+    cors: enable
+    corsConfig:
+      allowCredentials: true # true or false
+      allowedOrigins: '*'  # * or http://localhost:8080
+      allowedHeaders: '*'  #
+      allowedMethods: '*' # GET,POST or *
+      corsPath: /**
+    ajaxHeader: X-Requested-With
+    password:
+      encodeHashAsBase64: false
+      algorithm: SHA-512 # bcrypt,pbkdf2,ldap,SHA-256,SHA-1,SHA-512,SHA-384,SHA-224,MD4,MD5,MD2,noop,scrypt,sha256,SM3,SM4,custom
+    securityConfigType: Requestmap  #目前只支持此种db模式
+    userLookup:
+      userDomainClassName: org.yunchen.gb.example.childmanager.domain.core.BaseUser
+      authorityJoinClassName: org.yunchen.gb.example.childmanager.domain.core.BaseUserBaseRole
+    authority.className: org.yunchen.gb.example.childmanager.domain.core.BaseRole
+    requestMap.className: org.yunchen.gb.example.childmanager.domain.core.Requestmap
+    apf: #/** authenticationProcessingFilter */
+      filterProcessesUrl: /login/authenticate
+    auth:
+      loginFormUrl: /login/auth
+      alreadyLogin: /login/alreadyLogin #注释此行，则不再做当前session是否登录检查
+      useForward: false
+    adh: #/*accessDeniedHandler*/
+      errorPage: /login/denied
+      ajaxErrorPage: /login/ajaxDenied
+      useForward: true
+    failureHandler:
+      defaultFailureUrl: /login/authfail
+      defaultAjaxFailureUrl: /login/authajaxfail
+    successHandler:
+      defaultTargetUrl: /workspace/index  #登录成功后，若没有rediretUrl则引导进此url
+      ajaxSuccessUrl: /login/ajaxSuccess
+      systemloginRecord: org.yunchen.gb.example.childmanager.domain.core.SystemLoginRecord
+    logout:
+      afterLogoutUrl: /
+      filterProcessesUrl: /logoff
+    sessionAuthenticationStrategy:
+      maximumSessions: 1  #//-1 为不限,1为只可登录一个用户实例   不可为0
+      maxSessionsPreventsLogin: false  #// true 为后登陆用户异常，false 为先登陆用户session过期
+      expiredUrl: /login/concurrentSession  #为先登陆用户session过期，引导至此路径
+    rest:
+      active: true
+      jsSpaCombine: true  #启用vue等js框架打包后合并发布
+      jsPathPrefix: #js框架的router前缀列表
+        - /vue
+      jsRewritePath: /index.html  #js框架的入口地址
+      optionRequest: true #启用options预检请求的自动处理
+      login:
+        active: true
+        endpointUrl: /api/login
+        usernamePropertyName: username
+        passwordPropertyName: password
+        failureStatusCode: 401  # HttpServletResponse.SC_UNAUTHORIZED
+        useJsonCredentials: true
+        useRequestParamsCredentials: false
+      logout:
+        endpointUrl: /api/logout
+      token:
+        generation:
+          useSecureRandom: true
+          useUUID: false
+          jwt:
+            issuer: GB Spring Security REST Plugin
+            algorithm: HS256
+            jweAlgorithm: RSA-OAEP
+            encryptionMethod: A128GCM
+        storage:
+          jwt:
+            useSignedJwt: true
+            useEncryptedJwt: false
+            privateKeyPath: /home/.priavte
+            publicKeyPath: /home/.public
+            secret: yc-atlease256bits(The secret length must be at least 256 bits)
+            expiration: 3600
+        validation:
+          active: true
+          headerName: X-Auth-Token
+          endpointUrl: /api/validate
+          tokenHeaderMissingStatusCode: 401   #HttpServletResponse.SC_UNAUTHORIZED
+          enableAnonymousAccess: false
+          useBearerToken: true
+        rendering:
+          usernamePropertyName: username
+          tokenPropertyName: access_token
+          authoritiesPropertyName: roles
+  simplecaptcha:
+    fontSize: 30  #字体大小
+    height: 200
+    width: 200
+    length: 6 # 验证码字数
+    bottomPadding: 16 # 文字与底部的距离
+    lineSpacing: 10 # 用于混淆文本的对角线之间的距离
+    chars: ABCDEFGHIJKLMNOPQRSTUVWXYZ  # 文字的选取区间
+    font: Serif # 字体
+    storeInSession: true # 验证信息可选择存储与session或cookie中的一种
+  springsecuritycaptcha:
+    enabled: true   #启用
+    time: 5           # 过期时间 （分钟）
+    allowedNumberOfAttempts: 3  #无验证码尝试次数
+---
+spring:
+  profiles: development
+  thymeleaf:
+    cache: false
+    enabled: true
+    mode: html5
+    prefix: file:./src/main/resources/templates/thymeleaf3/
+    suffix: .html
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+  h2.console.enabled: true
+  h2.console.path: /dbconsole
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://8.141.154.81:3306/childmanager?characterEncoding=utf8&useSSL=false&useUnicode=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
+    username: root
+    password: root123!@#
+hibernate:
+  hbm2ddl:
+    auto: update  # one of create, create-drop, update, validate
+  dialect: org.hibernate.dialect.MySQL57Dialect
+  cache:
+    queries: false
+    use_second_level_cache: true
+    use_query_cache: false
+    region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+---
+spring:
+  profiles: test
+  thymeleaf:
+    cache: false
+    enabled: true
+    mode: html5
+    prefix: classpath:/templates/thymeleaf3/
+    suffix: .html
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+  h2.console.enabled: false
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+hibernate:
+  hbm2ddl:
+    auto: create  # one of create, create-drop, update, validate
+  dialect: org.hibernate.dialect.H2Dialect
+  cache:
+    queries: false
+    use_second_level_cache: true
+    use_query_cache: false
+    region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+---
+spring:
+  profiles: production
+  thymeleaf:
+    cache: false
+    enabled: true
+    mode: html5
+    prefix: classpath:/templates/thymeleaf3/
+    suffix: .html
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+  h2.console.enabled: false
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:./prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    type: com.zaxxer.hikari.HikariDataSource   #org.apache.tomcat.jdbc.pool.DataSource  # com.alibaba.druid.pool.DruidDataSource
+    hikari:
+      #连接池中允许的最大连接数。缺省值：10  一般设置为cpu*2+1
+      maximum-pool-size: 200
+      #等待连接池分配连接的最大时长（毫秒），超过这个时长还没可用的连接则发生SQLException， 缺省:30秒
+      connection-timeout: 60000
+      connection-test-query: SELECT 1
+      #auto-commit: true
+      #read-only: false
+      #一个连接idle状态的最大时长（毫秒），超时则被释放（retired），缺省:10分钟
+      #idle-timeout: 600000
+      #一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒
+      #max-lifetime: 1800000
+      minimum-idle: 10
+hibernate:
+  hbm2ddl:
+    auto: update  # one of create, create-drop, update, validate
+  dialect: org.hibernate.dialect.H2Dialect
+  cache:
+    queries: false
+    use_second_level_cache: true
+    use_query_cache: false
+    region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory

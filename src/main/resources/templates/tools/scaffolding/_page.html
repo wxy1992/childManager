@@ -1,0 +1,157 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="form">
+    <input type="hidden" name="id" id="id" th:value="\${${propertyName}Instance.id}"/>
+    <input type="hidden" name="version" id="version" th:value="\${${propertyName}Instance.version}"/>
+    <%
+    List persistentProps=domainClass.gormPersistentEntity.persistentProperties;
+    List excludedProps = ['id','version','dateCreated','lastUpdated'];
+    %>
+    <div class="row">
+        <div class="col-md-12">
+            <%
+            persistentProps.each{property->
+            if(excludedProps.contains(property.name)){return}
+            def cp=constrainedProperties[property.name];
+            String required="required";
+            if(cp?.nullable || cp?.blank){
+            required="";
+            }
+            if (property.type == Boolean || property.type == boolean){
+
+            }else if (property.type && Number.isAssignableFrom(property.type) || (property.type?.isPrimitive() &&
+            property.type != boolean)){
+            %>
+            <div class="form-group">
+                <input type="number" class="form-control" name="${property.name}" ${required}
+                       id="input${className}-${property.name}" th:value="\${${propertyName}Instance.${property.name}}">
+                <span class="form-bar"></span>
+                <label for="input${className}-${property.name}" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+            </div>
+            <%
+            }else if (property.type == String){
+            %>
+            <div class="form-group">
+                <input type="text" class="form-control" name="${property.name}" ${required}
+                       id="input${className}-${property.name}" th:value="\${${propertyName}Instance.${property.name}}">
+                <span class="form-bar"></span>
+                <label for="input${className}-${property.name}" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+            </div>
+            <%
+            }else if (property.type == Date || property.type == java.sql.Date || property.type == java.sql.Time ||
+            property.type == Calendar){
+            %>
+            <div class="form-group">
+                <input type="text" class="form-control datepicker" name="${property.name}" ${required}
+                       id="input${className}-${property.name}" th:value="\${${propertyName}Instance.${property.name}}">
+                <span class="form-bar"></span>
+                <label for="input${className}-${property.name}" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+            </div>
+            <%
+            }else if (property.type == URL){
+
+            }else if (property.type == TimeZone){
+
+            }else if (property.type == Locale){
+
+            }else if (property.type == Currency){
+
+            }else if (property.type==([] as Byte[]).class || property.type==([] as byte[]).class ||
+            property.type==java.sql.Blob){
+            %>
+            <div class="form-group">
+                <input type="file" class="form-control" name="${property.name}-file" ${required}
+                       id="input${className}-${property.name}">
+                <span class="form-bar"></span>
+                <label for="input${className}-${property.name}" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+            </div>
+            <%
+            }else if (org.yunchen.gb.core.GbSpringUtils.isDomain(property.type)){
+            %>
+            <div class="form-group">
+                <select class="form-control selectpicker" name="${property.name}.id" title="--"
+                        id="input${className}-${property.name}"
+                        data-placeholder="select：" ${required}>
+                    <option value=""></option>
+                    <option th:each="${property.name}:\${${property.name}s}" th:value="\${${property.name}.id}"
+                            th:selected="\${#strings.equals(${propertyName}Instance.${property.name}Id,${property.name}.id)}"
+                            th:text="\${${property.name}.toString()}">name：
+                    </option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="input${className}-${property.name}" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+            </div>
+            <%
+            }else if (property.type==java.util.SortedSet || property.type==java.util.Set){
+
+            }
+
+            }
+            %>
+        </div>
+    </div>
+</div>
+<div th:fragment="show">
+
+    <div class="form-group-separated">
+        <div class="form-group">
+            <%
+            persistentProps.each{property->
+            if(excludedProps.contains(property.name)){return}
+            def cp=constrainedProperties[property.name];
+            String required="required";
+            if(cp?.nullable || cp?.blank){
+            required="";
+            }
+            if (property.type == Boolean || property.type == boolean){
+
+            }else if (property.type && Number.isAssignableFrom(property.type) || (property.type?.isPrimitive() &&
+            property.type != boolean)){
+            %>
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="\${${propertyName}Instance.${property.name}}"/></div>
+            </div>
+            <%
+            }else if (property.type == String){
+            %>
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="\${${propertyName}Instance.${property.name}}"/></div>
+            </div>
+            <%
+            }else if (property.type == Date || property.type == java.sql.Date || property.type == java.sql.Time ||
+            property.type == Calendar){
+            %>
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{${propertyName}.${property.name}.label}">${property.name}</label>
+                <div class="col-md-8 col-xs-7"><label
+                        th:utext="\${#dates.format(${propertyName}Instance.${property.name},'yyyy-MM-dd')}"/></div>
+            </div>
+            <%
+            }else if (property.type == URL){
+
+            }else if (property.type == TimeZone){
+
+            }else if (property.type == Locale){
+
+            }else if (property.type == Currency){
+
+            }else if (property.type==([] as Byte[]).class || property.type==([] as byte[]).class ||
+            property.type==java.sql.Blob){
+
+
+            }else if (org.yunchen.gb.core.GbSpringUtils.isDomain(property.type)){
+            %>
+
+            <%
+            }else if (property.type==java.util.SortedSet || property.type==java.util.Set){
+
+            }
+
+            }
+            %>
+        </div>
+
+    </div>
+
+</div>

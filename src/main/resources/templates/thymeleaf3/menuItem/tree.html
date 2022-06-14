@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<script type="text/javascript">
+    <!--
+    var contextPath = '[[${#httpServletRequest.contextPath}]]';
+    var setting = {
+        view: {
+            addHoverDom: null,
+            removeHoverDom: removeHoverDom,
+            selectedMulti: false
+        },
+        check: {
+            enable: false
+        },
+        edit: {
+            enable: true,
+            showRemoveBtn: false,
+            showRenameBtn: false
+        },
+        callback: {
+            onDrop: zTreeOnDrop
+        }
+    };
+    $(document).ready(function () {
+        $.post(contextPath + '/menuItem/treeJson', {},
+            function (data, status) {
+                $.fn.zTree.init($("#treeObj"), setting, data);
+            }, "json");
+
+    });
+
+    var newCount = 1;
+
+    function addHoverDom(treeId, treeNode) {
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (treeNode.editNameFlag || $("#addBtn_" + treeNode.tId).length > 0) return;
+        var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+            + "' title='add node' onfocus='this.blur();'></span>";
+        sObj.after(addStr);
+        var btn = $("#addBtn_" + treeNode.tId);
+        if (btn) btn.bind("click", function () {
+            var zTree = $.fn.zTree.getZTreeObj("treeObj");
+            zTree.addNodes(treeNode, {id: (100 + newCount), pId: treeNode.id, name: "new node" + (newCount++)});
+            return false;
+        });
+    };
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_" + treeNode.tId).unbind().remove();
+    };
+
+    function saveToServer(dragId, dropId, type) {
+        var obj = {};
+        obj.dragId = dragId;
+        obj.dropId = dropId;
+        obj.type = type;
+        $.post(contextPath + '/menuItem/treeMoveAction', obj,
+            function (data, status) {
+
+            }, "json");
+    }
+
+    function zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+        //alert(moveType);
+        //alert(treeNodes.length + "," + (targetNode ? (targetNode.tId + ", " + targetNode.name) : "isRoot" ));
+        //isRoot 是 总节点
+        //inner  pre  next
+        var dragId = treeNodes[0].id;
+        var dropId;
+        if (targetNode) {
+            dropId = targetNode.id;
+        }
+        if (moveType == null) {
+            //不处理
+        }
+        if (moveType == 'inner') {
+            if (targetNode) {
+                saveToServer(dragId, dropId, 'inner');
+            }
+        }
+        if (moveType == 'prev') {
+            if (targetNode) {
+                saveToServer(dragId, dropId, 'prev');
+            } else {//"isRoot"
+                saveToServer(dragId, null, 'isRoot');
+            }
+        }
+        if (moveType == 'next') {
+            if (targetNode) {
+                saveToServer(dragId, dropId, 'next');
+            }
+        }
+    };
+    //-->
+</script>
+<ul id="treeObj" class="ztree"></ul>
+</html>

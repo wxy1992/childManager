@@ -1,0 +1,88 @@
+<%=servicePackageName ? "package ${servicePackageName}\n\n" : ''%>
+
+import ${domainClass.name}
+import org.yunchen.gb.core.PageParams
+import groovy.util.logging.Slf4j
+import org.grails.datastore.mapping.query.api.BuildableCriteria
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.interceptor.TransactionAspectSupport
+/**
+ * Generate by GbTools ${toolVersion} on ${new Date().format('yyyy-MM-dd')}.
+ */
+@Slf4j
+@Service
+@Transactional
+class ${className}Service {
+    public Map search(PageParams pageParams,String search){
+        Map map = new HashMap();
+        Closure searchLogic={
+            if(search){
+                //like('name',"%\${search}%")
+            }
+        }
+        long count = this.count(searchLogic)
+        List list = this.list(pageParams,searchLogic)
+        map.total = count;
+        map.rows = list;
+        return map;
+    }
+    public long count(Closure logic){
+        BuildableCriteria buildableCriteria=${className}.createCriteria()
+        logic.delegate=buildableCriteria
+        long count= buildableCriteria.count{
+            logic()
+        }
+        return count
+    }
+    public List list(PageParams pageParams, Closure logic){
+        BuildableCriteria buildableCriteria=${className}.createCriteria()
+        logic.delegate=buildableCriteria
+        List list = buildableCriteria.list {
+            logic()
+            order(pageParams.sort, pageParams.order)
+            maxResults(pageParams.max)
+            firstResult(pageParams.offset)
+        }
+        return list;
+    }
+    public ${className} create(Map map=[:]){
+        return new ${className}(map)
+    }
+    public ${className} get(long id){
+        return ${className}.get(id)
+    }
+    public ${className} read(long id){
+        return ${className}.read(id)
+    }
+    public boolean save(${className} ${propertyName},boolean flush=true){
+        return ${propertyName}.save(flush:flush)
+    }
+    public boolean delete(${className} ${propertyName},boolean flush=true){
+        ${className}.withTransaction { status ->
+            try {
+                ${propertyName}.delete(flush:flush);
+                return true
+            } catch (Exception e) {
+                status.setRollbackOnly()
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
+                return false
+            }
+        }
+    }
+    public boolean deletes(String ids,boolean flush=true){
+        List list = ids?.tokenize(',')?.unique()?.collect { it.toLong()};
+        ${className}.withTransaction { status ->
+            try {
+                ${className}.where {
+                    id in list
+                }.deleteAll();
+                return true;
+            } catch (e) {
+                status.setRollbackOnly()
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
+                return false
+            }
+        }
+    }
+}

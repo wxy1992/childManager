@@ -1,0 +1,71 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="form">
+    <input type="hidden" name="id" id="id" th:value="${requestmapInstance.id}"/>
+    <input type="hidden" name="version" id="version" th:value="${requestmapInstance.version}"/>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <input type="text" class="form-control" name="name" required id="inputRequestmap-name"
+                       th:value="${requestmapInstance.name}">
+                <span class="form-bar"></span>
+                <label for="inputRequestmap-name" th:text="#{requestmap.name.label}">name</label>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" name="url" required id="inputRequestmap-url"
+                       th:value="${requestmapInstance.url}">
+                <span class="form-bar"></span>
+                <label for="inputRequestmap-url" th:text="#{requestmap.url.label}">url</label>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-2"/>
+                <div class="col-md-4">当前值:</div>
+                <div class="col-md-6"><span th:text="${requestmapInstance.configAttribute}"></span>&nbsp;</div>
+
+                <select class="form-control selectpicker col-md-6" name="authorityType" title="-授权方式-"
+                        id="authorityType"
+                        data-placeholder="select：">
+                    <option th:each="type:${authorityTypeSource}" th:value="${type.id}"
+                            th:selected="${#strings.equals(requestmapInstance.authorityType,type.id)}"
+                            th:disabled="${#strings.equals('disabled',type.disabled)}"
+                            th:text="${type.label}"></option>
+                </select>
+                <select class="form-control selectpicker  col-md-6" name="authorityRole" multiple title="-授权角色-"
+                        id="authorityRole" data-placeholder="select：">
+                    <option th:each="role:${roles}" th:value="${role.id}"
+                            th:selected="${#lists.contains(authorityRoles,role.id)}"
+                            th:text="${role.description}"></option>
+                </select>
+                <span class="form-bar"></span>
+                <label for="authorityType" th:text="#{requestmap.configAttribute.label}">configAttribute</label>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<div th:fragment="show">
+
+    <div class="form-group-separated">
+        <div class="form-group">
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{requestmap.name.label}">name</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${requestmapInstance.name}"/></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{requestmap.url.label}">url</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${requestmapInstance.url}"/></div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 col-xs-5 control-label" th:text="#{requestmap.configAttribute.label}">configAttribute</label>
+                <div class="col-md-8 col-xs-7"><label th:utext="${requestmapInstance.configAttribute}"/></div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

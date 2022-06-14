@@ -1,0 +1,6 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<h1>创建</h1>
+<form role="form" class="form-material form-horizontal" id="menuItemForm"
+      enctype="application/x-www-form-urlencoded" method="post">
+    <div th:include="menuItem/_page :: form" th:with="menuItemInstance=${menuItemInstance}"></div>
+</form>

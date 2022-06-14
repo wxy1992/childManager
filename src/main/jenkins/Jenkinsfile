@@ -1,0 +1,81 @@
+def group = "gb-project"
+def baseName = 'childManager'
+def version = '0.0.1-SNAPSHOT'
+def svrPort = "8088"
+def repository="artifactory.yunchen.org"
+//@todo change user & password
+def repoUser = "user"
+def repoPass = "********"
+
+pipeline {
+    stage('Check out'){
+        checkout scm
+    }
+    stage('Docker image'){
+        //sh 'pwd'
+        //sh 'ls'
+        sh 'chmod +x gradlew'
+        sh './gradlew build docker'
+        sh "docker tag ${group}/${baseName} ${repository}/${baseName}"
+        sh "docker login -u ${repoUser} -p ${repoPass} ${repository}"
+        sh "docker push ${repository}/${baseName}"
+        sh "docker logout ${repository}"
+    }
+    stage('deploy') {
+        //需要确保挂载/var/lib/docker目录，k8s采用yaml部署，不需要挂载
+        sh """
+		docker image rmi ${repository}/${baseName}|true
+		docker login -u ${repoUser} -p ${repoPass} ${repository}
+		docker pull ${repository}/${baseName}
+        """
+
+        def createService = """
+echo \"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ${baseName}
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: ${baseName}
+    spec:
+      containers:
+      - name: ${baseName}
+        image: ${repository}/${baseName}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web
+          containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${baseName}svr
+  namespace: default
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: ${svrPort}
+  selector:
+    name: ${baseName}
+\" >> depoly.yaml
+	"""
+
+        sh "kubectl -n default delete Deployment ${baseName} | true"
+        sh "kubectl -n default delete service ${baseName} | true"
+        sh createService
+        sh 'cat depoly.yaml'
+        sh 'kubectl apply -f depoly.yaml'
+
+        sh "sleep 30"
+        sh "docker images| grep none |awk '{print \$3 }'|xargs docker rmi -f"
+
+    }
+}

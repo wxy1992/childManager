@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title>应用系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+
+    <link rel="stylesheet" type="text/css"
+          th:href="${#httpServletRequest.getContextPath()}+'/webjars/bootstrap/4.3.1/dist/css/bootstrap.css'"/>
+    <link rel="stylesheet" type="text/css" th:href="${#httpServletRequest.getContextPath()}+'/css/login.css'"/>
+
+    <link rel="icon" th:href="${#httpServletRequest.getContextPath()}+'/images/favicon.ico'"/>
+    <script type="text/javascript"
+            th:src="${#httpServletRequest.getContextPath()}+'/webjars/jquery/1.12.4/jquery.js'"></script>
+    <script type="text/javascript" th:src="${#httpServletRequest.getContextPath()}+'/js/jqueryPlus.js'"></script>
+    <script th:src="${#httpServletRequest.getContextPath()}+'/webjars/bootstrap/4.3.1/dist/js/bootstrap.js'"></script>
+    <script type='text/javascript'
+            th:src="${#httpServletRequest.getContextPath()}+'/webjars/jquery-validation/1.19.0/jquery.validate.js'"></script>
+    <script th:src="${#httpServletRequest.getContextPath()}+'/js/browserCheck.js'"></script>
+    <script type="text/javascript">
+        $(function () {
+            document.forms['loginForm'].elements['username'].focus();
+            $.ajaxSetup({
+                cache: false,
+                complete: function (xhr, textStatus) {
+                },
+                beforeSend: function (xhr) {
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    //长时间不访问，造成状态是UNSENT或者OPENED
+                    if (xhr.status == 0) {
+                        document.location.reload();
+                    }
+                    return;
+                },
+                traditional: true
+            });
+        });
+    </script>
+    <section layout:fragment="head">
+    </section>
+</head>
+<body class="body-full-height">
+<div class="login-container lightmode">
+    <section layout:fragment="body">
+    </section>
+</div>
+</body>
+</html>

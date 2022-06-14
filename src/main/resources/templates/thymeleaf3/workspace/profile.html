@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/main">
+<head>
+    <meta charset="UTF-8">
+    <title layout:fragment="title">profile</title>
+    <section layout:fragment="head">
+    </section>
+</head>
+<body layout:fragment="body">
+
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-12 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">个人信息</h6>
+            </div>
+            <div class="card-body">
+                <h1><span th:text="${currentUser.realname}"></span> <br>
+                </h1>
+                <strong>username:</strong> <span th:text="${currentUser.username}"/><br>
+                <strong>enabled:</strong> <span th:text="${currentUser.enabled}"/><br>
+                <strong>accountExpired:</strong> <span th:text="${currentUser.accountExpired}"/><br>
+                <strong>passwordExpired:</strong> <span th:text="${currentUser.passwordExpired}"/><br>
+                <strong>accountLocked:</strong> <span th:text="${currentUser.accountLocked}"/><br>
+                <strong>角色:</strong> <span th:text="${currentUser.authorities}"/><br>
+                <strong>Status:</strong> <span class="label-success label label-default">Approved</span>
+            </div>
+        </div>
+
+
+    </div>
+
+
+</div><!--/row-->
+
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header well">
+                <h2><i class="glyphicon glyphicon-info-sign"></i></h2>
+
+            </div>
+            <div class="box-content row">
+                <div class="col-lg-7 col-md-12">
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tools div -->
+
+</body>
+</html>

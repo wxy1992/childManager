@@ -1,0 +1,41 @@
+<%=servicePackageName ? "package ${servicePackageName}\n\n" : ''%>
+
+import ${domainClass.name}
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.core.annotation.Order
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.junit4.SpringRunner
+/**
+ * Generate by GbTools ${toolVersion} on ${new Date().format('yyyy-MM-dd')}.
+ */
+
+@ComponentScan(basePackages=["org.yunchen.gb"])
+@ActiveProfiles("test")
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableAutoConfiguration
+class ${className}ServiceTests {
+    @Autowired ${className}Service ${propertyName}Service
+    @Test
+    public void testCRUD(){
+        long count=${propertyName}Service.count({})
+        ${className} ${propertyName} = ${propertyName}Service.create([:])
+         //@todo 完善属性赋值
+        //${propertyName}.name='xxx'
+        ${propertyName}Service.save(${propertyName})
+        assert ${propertyName}Service.count({})==(count+1)
+        ${propertyName}=${propertyName}Service.get(${propertyName}.id)
+         //@todo 修改属性值
+        //${propertyName}.name='xxx'
+        ${propertyName}Service.save(${propertyName})
+        //@todo 判断值是否修改
+        //assert ${propertyName}Service.get(${propertyName}.id).name='xxx'
+        ${propertyName}Service.delete(${propertyName})
+        assert ${propertyName}Service.count({})==count
+    }
+}

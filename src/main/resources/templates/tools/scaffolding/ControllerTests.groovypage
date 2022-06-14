@@ -1,0 +1,127 @@
+<%=packageName ? "package ${packageName}\n\n" : ''%>
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.MediaType;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
+import javax.servlet.http.HttpSession;
+import static org.hamcrest.Matchers.is;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * ${className}Controller集成测试类
+ *  真实数据库环境、springsecurity环境
+ */
+@ActiveProfiles("test")
+@RunWith(SpringRunner.class)
+@ComponentScan(basePackages=["org.yunchen.gb"])
+@EnableAutoConfiguration
+@SpringBootTest
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)  //测试方法执行顺序遵循字母排序
+class ${className}ControllerTests {
+    @Autowired
+    private FilterChainProxy springSecurityFilterChain;
+    @Autowired
+    WebApplicationContext webContext;
+    @Autowired
+    private HttpSession session;
+
+    private MockMvc mockMvc;
+    @Before
+    public void setupMockMvc() {
+        //创建mockMvc 使用真实springsecurity环境
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(webContext)
+                .addFilters(springSecurityFilterChain)
+                .build();
+        //获取登录用户session
+        session = mockMvc.perform(post("/login/authenticate")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("username", "admin")
+                .param("password", "admin"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/workspace/index"))
+                .andReturn()
+                .getRequest()
+                .getSession();
+    }
+    @Test
+    public void test0saveMock() throws Exception {
+        String responseString =mockMvc.perform(get("/${propertyName}/save")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .session(session)
+                 //@todo 完善表单数据
+                //.param("name","111")
+                //.param("birthday","2017-07-07")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('\$.result',is(true)))
+                .andReturn().getResponse().getContentAsString();
+        println("--------返回的json = " + responseString);
+        Assert.assertTrue(responseString.contains('"result":true'))
+    }
+    @Test
+    public void test1indexMock() {
+        mockMvc.perform(get("/${propertyName}/index").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("${propertyName}/index"));
+    }
+    @Test
+    public void test2jsonMock() throws Exception {
+        String responseString =mockMvc.perform(get("/${propertyName}/json")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED).session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('\$.total',is(1)))
+                .andReturn().getResponse().getContentAsString();
+        println("--------返回的json = " + responseString);
+    }
+    @Test
+    public void test3updateMock() throws Exception {
+        String responseString =mockMvc.perform(get("/${propertyName}/update")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED).session(session)
+                 //@todo 完善表单数据
+                //.param("name","111")
+                //.param("birthday","2017-07-07")
+                //.param("id","1")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('\$.result',is(true)))
+                .andReturn().getResponse().getContentAsString();
+        println("--------返回的json = " + responseString);
+        Assert.assertTrue(responseString.contains('"result":true'))
+    }
+    @Test
+    public void test4deleteMock() throws Exception {
+        String responseString =mockMvc.perform(get("/${propertyName}/delete")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED).session(session)
+                //@todo 完善表单数据
+                .param("id","1")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('\$.result',is(true)))
+                .andReturn().getResponse().getContentAsString();
+        println("--------返回的json = " + responseString);
+        Assert.assertTrue(responseString.contains('"result":true'))
+    }
+
+}

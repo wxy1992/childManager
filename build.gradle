@@ -1,0 +1,120 @@
+buildscript {
+	ext {
+		springBootVersion = '2.6.2'
+		gormVersion = '7.2.1'
+		groovyVersion = '3.0.8'
+		springVersion = '5.3.14'
+		springSecurityVersion = '5.6.1'
+		hibernate5Version = '5.6.3.Final'
+		hibernateValidatorVersion = '6.2.0.Final'
+		tomcatVersion = '9.0.52'
+		javaxServletVersion = '4.0.1'
+		dockerBuildDir = mkdir("${buildDir}/docker")
+	}
+
+	repositories {
+		maven { url "https://plugins.gradle.org/m2/" }
+		jcenter()
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/release" }
+		maven { url "https://repo.grails.org/grails/core" }
+		maven { url "https://central.maven.org/maven2/" }
+		maven { url "https://download.java.net/maven/2/" }
+		maven { url "https://repository.jboss.com/maven2/" }
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.22.1')
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'com.palantir.docker'
+jar{
+	baseName = 'childManager'
+	version = '0.0.1-SNAPSHOT'
+}
+bootJar {
+	baseName = 'childManager'
+	version = '0.0.1-SNAPSHOT'
+}
+group = 'gb-project'
+
+
+sourceCompatibility = 1.8
+
+repositories {
+	maven { url "https://repo1.maven.org/maven2/" }
+	maven { url "https://repo.grails.org/grails/core" }
+	maven { url "https://repo.spring.io/libs-milestone/" }
+	maven { url "https://repo.spring.io/plugins-release/" }
+	maven { url "https://central.maven.org/maven2/" }
+	maven { url "https://download.java.net/maven/2/" }
+	maven { url "https://repository.jboss.com/maven2/" }
+	mavenCentral()
+}
+
+
+
+
+dependencies {
+	implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.25'
+	implementation("org.javassist:javassist:3.28.0-GA")
+	implementation('commons-lang:commons-lang:2.6')
+	implementation("org.grails:gorm-hibernate5-spring-boot:${gormVersion}")
+	implementation("org.grails:grails-datastore-core:${gormVersion}")
+	implementation("org.grails:grails-datastore-gorm:${gormVersion}")
+	implementation("org.grails:grails-datastore-gorm-hibernate5:${gormVersion}")
+	implementation("org.hibernate:hibernate-ehcache:${hibernate5Version}")
+	implementation("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+	implementation("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}")
+
+	implementation('org.yunchen.gb:gb-core:1.2.1.4')
+//	implementation('org.yunchen.gb:gb-plugin-auditlog:1.2.0')
+	implementation('org.yunchen.gb:gb-plugin-poi:1.2.0')
+	implementation('org.yunchen.gb:gb-plugin-simplecaptcha:1.2.0')
+	implementation('org.yunchen.gb:gb-plugin-springsecurity:1.2.1')
+	implementation('org.yunchen.gb:gb-plugin-springsecurity-captcha:1.2.1')
+	implementation('org.yunchen.gb:gb-plugin-springsecurity-rest:1.2.1')
+	implementation('org.yunchen.gb:gb-plugin-springsecurity-rest:1.2.1')
+
+    implementation("org.springframework.security:spring-security-core:${springSecurityVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+        exclude module: "spring-boot-starter-tomcat"
+        exclude module: "spring-boot-starter-logging"
+        exclude module: "logback-classic"
+    }
+    runtimeOnly("com.h2database:h2:1.4.192")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation ("org.codehaus.groovy:groovy:${groovyVersion}")
+    implementation ("org.codehaus.groovy:groovy-templates:${groovyVersion}")
+	implementation ("org.codehaus.groovy:groovy-sql:${groovyVersion}")
+	implementation ("org.codehaus.groovy:groovy-datetime:${groovyVersion}")
+	implementation ("org.codehaus.groovy:groovy-dateutil:${groovyVersion}")
+}
+task prepareDocker(type: Copy, dependsOn: assemble) {
+	description = 'Copy files from src/main/docker to Docker temporal build directory'
+	group = 'Docker'
+	from 'src/main/docker'
+	into dockerBuildDir
+}
+
+task unpack(type: Copy, dependsOn: prepareDocker) {
+	dependsOn bootJar
+	from(zipTree(tasks.bootJar.outputs.files.singleFile))
+	into("build/dependency")
+}
+docker {
+	name "${project.group}/${bootJar.baseName}"
+	copySpec.from(tasks.unpack.outputs).into("dependency")
+	buildArgs(['DEPENDENCY': "dependency"])
+}

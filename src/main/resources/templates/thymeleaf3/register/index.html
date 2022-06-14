@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layout/login">
+<head>
+    <title>注册应用系统</title>
+    <section layout:fragment="head">
+        <style>
+            label.error,
+            label.valid {
+                color: #b64645;
+                margin-bottom: 0px;
+                margin-top: 3px;
+                font-size: 11px;
+                font-weight: normal;
+                width: 100%;
+                text-align: right;
+            }
+        </style>
+        <script type="text/javascript">
+            var contextPath = '[[${#httpServletRequest.contextPath}]]';
+            var postUrl = '[[${postUrl}]]';
+
+            function register() {
+                $.post($('#registerForm').attr("action"), $('#registerForm').serialize(),
+                    function (data, textStatus) {
+                        if (data.result) {
+                            alert(data.message);
+                            document.location.href = contextPath + "/login/auth";
+                        } else {
+                            if (data.errors) {
+                                var validator = $("#registerForm").validate();
+                                validator.showErrors(data.errors);
+                            } else {
+                                $(".message").html(data.message);
+                                alert(data.message);
+                            }
+                        }
+                    }, "json");
+            }
+        </script>
+    </section>
+
+</head>
+<body layout:fragment="body">
+<div class="login-box animated fadeInDown">
+    <div class="login-logo" style="width:120px;font-size:29px;margin:0px auto;"><strong>应用</strong>系统</div>
+    <div class="login-body">
+        <div class="login-title"><strong>注册</strong>账号</div>
+
+        <form id="registerForm" th:action="${#httpServletRequest.getContextPath()}+'/register/onlineReg'"
+              class="form-horizontal" method="post" autocomplete='off'>
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class='message' style="color: #ff0000;" th:text="${message}"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <input type="text" id="username" name="username" class="form-control" required placeholder="用户名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <input type="text" id="realname" name="realname" class="form-control" required placeholder="真实姓名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <input type="password" id="password" name="password" class="form-control" required
+                           placeholder="密码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <input type="password" id="repassword" name="repassword" class="form-control" required
+                           placeholder="确认密码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-6">
+
+                </div>
+                <div class="col-md-6">
+                    <button type="button" onclick="register()" class="btn btn-info btn-block">注册</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="login-footer">
+        <div class="pull-left">
+            &copy; 2020 AppName
+        </div>
+        <div class="pull-right">
+            <a th:href="${#httpServletRequest.getContextPath()}+'/login/auth'">登录</a> |
+            <a th:href="${#httpServletRequest.getContextPath()}+'/'">返回前台</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

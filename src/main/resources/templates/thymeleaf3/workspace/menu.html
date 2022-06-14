@@ -1,0 +1,4 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<li th:each="domain,status:${domains}">
+    <a th:href="${#httpServletRequest.getContextPath()}+'/'+${domain}+'/index'" th:text="${domain}">domain</a>
+</li>
